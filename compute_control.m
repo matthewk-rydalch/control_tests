@@ -1,7 +1,6 @@
 function tau = compute_control()
     global xc vc thc thdc x t
     vc = compute_position_loop(xc);
-%     vc = 1;
     ac = compute_velocity_loop(vc);
     thc = convert_2_theta(ac);
     thdc = compute_theta_loop(thc);
@@ -9,10 +8,11 @@ function tau = compute_control()
 end
 
 function vc = compute_position_loop(xc)
-    global x kpx kdx vb;
+    global x kpx kix vb vb_noise dt itermX kffx;
     px = x(1);
     e = xc-px;
-    vc = e*kpx-x(2)*kdx+vb;
+    vc = e*kpx+kix*itermX+kffx*vb_noise;
+    itermX = itermX+e*dt;
     vc = saturate(vc,-5.0,5.0);
 end
 
@@ -21,7 +21,7 @@ function ac = compute_velocity_loop(vc)
     v = x(2);
     a = differentiate_state(v,vPrev);
     e = vc-v;
-    acMPerSSquared = e*kpv-a*kdv+vb*kff;
+    acMPerSSquared = e*kpv-a*kdv+x(2)*kff;
     acGs = acMPerSSquared/9.81;
     ac = saturate(acGs,-1,1);
     vPrev = v;
@@ -46,11 +46,6 @@ function tau = compute_theta_dot_loop(thdc)
 end
 
 function thc = convert_2_theta(ac)
-    global Mt fe;
-    %TODO fix this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-    %acceleration in g's
-%     thc = ac;%-asin(ac);
-%     thc = ac*Mt/(-fe);
     thc = -asin(ac);
 %     thc = saturate(thc,-0.2,0.2);
 end
