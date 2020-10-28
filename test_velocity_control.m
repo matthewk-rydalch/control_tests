@@ -6,13 +6,14 @@ global pb pb_hist vb vb_noise vb_hist;
 global xc vc thc thdc;
 global t tb tb_hist dt;
 global Mt fe mu Jt;
-global kpx kix kpv kdv kpth kdth kpthd kdthd kff kffx;
+global kpx kdx kix kpv kdv kpth kdth kpthd kdthd kff kffx;
 global itermX;
 global vPrev thdPrev;
+global eLpf sigma;
 
 %[px,px_dot,th,th_dot]
 x = [0,0,0,0];
-pb = 1.0;
+pb = .1;
 pb_hist = [];
 vb = 1;
 vb_noise = vb;
@@ -29,8 +30,9 @@ Mt = 1.5;
 fe = 9.81*Mt;
 mu = 0.1; %Put this back on!!!!!!!!!
 Jt = 0.0042+(2*0.5)*0.3^2;
-kpx = .8;
-kix = 0.05;
+kpx = 1.5;
+kdx = 0.5;
+kix = 1.0;
 kpv = 5;
 kdv = 2;
 kpth = 8;
@@ -42,9 +44,11 @@ kff = 0.7*(mu/Mt+0.035);
 itermX = 0;
 vPrev = 0;
 thdPrev = 0;
+eLpf = xc-x(1);
+sigma = 5;
 
 f = 0;
-tf = 20;
+tf = 25;
 P = [Mt;fe;mu;Jt];
 while t < tf
    boat_sim();
@@ -53,7 +57,7 @@ while t < tf
    t = t + dt;
 %    plot_error()
    plot_positions()
-   plot_velocity()
+%    plot_velocity()
 %     plot_attitude();
 %     plot_thd()
 end

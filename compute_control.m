@@ -8,11 +8,12 @@ function tau = compute_control()
 end
 
 function vc = compute_position_loop(xc)
-    global x kpx kix vb vb_noise dt itermX kffx;
+    global x kpx kdx kix vb vb_noise dt itermX kffx eLpf;
     px = x(1);
     e = xc-px;
-    vc = e*kpx+kix*itermX+kffx*vb_noise;
-    itermX = itermX+e*dt;
+    vc = e*kpx-kdx*x(2)+kix*itermX+kffx*vb_noise;
+    eLpf = lpf(e,eLpf);
+    itermX = itermX+eLpf*dt
     vc = saturate(vc,-5.0,5.0);
 end
 
@@ -63,4 +64,8 @@ function stateDot = differentiate_state(state,statePrev);
     stateDot = (state-statePrev)/dt;
 end
 
+function xLpf = lpf(xt, xPrev)
+    global dt sigma;
+    xLpf = xt*dt/(sigma+dt) + xPrev*sigma/(sigma+dt);
+end
     
